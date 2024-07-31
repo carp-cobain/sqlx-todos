@@ -1,3 +1,7 @@
+#![feature(unboxed_closures)]
+#![feature(async_fn_traits)]
+#![feature(async_closure)]
+
 pub mod api;
 pub mod config;
 pub mod domain;

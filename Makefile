@@ -1,34 +1,38 @@
 .PHONY: all
-all: fmt build test lint
+all: fmt check
 
 .PHONY: fmt
 fmt:
-	@cargo fmt --all
+	cargo +nightly fmt --all
+
+.PHONY: check
+check:
+	cargo +nightly check
 
 .PHONY: build
 build:
-	@cargo build
+	@cargo +nightly build
 
 .PHONY: test
 test:
-	@cargo test
+	@cargo +nightly test
 
 .PHONY: itest
 itest:
-	@RUST_LOG=off cargo test -- --ignored
+	@RUST_LOG=off cargo +nightly test -- --ignored
 
 .PHONY: lint
 lint:
-	@cargo clippy
+	@cargo +nightly clippy
 
 .PHONY: clean
 clean:
-	@cargo clean
+	@cargo +nightly clean
 
 .PHONY: run
 run:
-	@cargo run
+	@cargo +nightly run
 
 .PHONY: release
 release:
-	@cargo build --release
+	@cargo +nightly build --release

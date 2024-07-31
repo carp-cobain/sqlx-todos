@@ -8,7 +8,6 @@ pub mod task;
 
 /// Defines a single unit of business logic.
 /// Inspired by Finagle's Service type: `trait Service[Req, Rep] extends (Req => Future[Rep])`
-/// TODO: Look at using `Fn` (requires unstable feature "fn_traits").
 #[async_trait]
 pub trait UseCase: Sized + Send + Sync + 'static {
     /// Input arguments

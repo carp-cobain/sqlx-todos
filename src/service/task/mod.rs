@@ -23,29 +23,29 @@ use update_task::UpdateTask;
 /// A high-level API for managaing tasks.
 /// This service is composed of use cases.
 pub struct TaskService {
-    create_task: CreateTask,
     delete_task: DeleteTask,
     get_task: GetTask,
     get_tasks: GetTasks,
     update_task: UpdateTask,
+    repo: Arc<Repo>,
 }
 
 impl TaskService {
     /// Create a new task service
     pub fn new(repo: Arc<Repo>) -> Self {
         Self {
-            create_task: CreateTask(repo.clone()),
             delete_task: DeleteTask(repo.clone()),
             get_task: GetTask(repo.clone()),
             get_tasks: GetTasks(repo.clone()),
             update_task: UpdateTask(repo.clone()),
+            repo,
         }
     }
 
     /// Create a task
     pub async fn create(&self, story_id: i32, name: String) -> Result<Task> {
-        let args = (story_id, name);
-        self.create_task.execute(args).await
+        let create_task = CreateTask(self.repo.clone());
+        create_task(story_id, name).await
     }
 
     /// Delete a task
