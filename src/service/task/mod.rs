@@ -1,4 +1,3 @@
-use super::UseCase;
 use crate::{
     domain::{Status, Task},
     repo::Repo,
@@ -14,53 +13,42 @@ mod get_tasks;
 mod update_task;
 
 // Use cases
-use create_task::CreateTask;
-use delete_task::DeleteTask;
-use get_task::GetTask;
-use get_tasks::GetTasks;
-use update_task::UpdateTask;
+use create_task::create_task;
+use delete_task::delete_task;
+use get_task::get_task;
+use get_tasks::get_tasks;
+use update_task::update_task;
 
 /// A high-level API for managaing tasks.
 /// This service is composed of use cases.
 pub struct TaskService {
-    delete_task: DeleteTask,
-    get_task: GetTask,
-    get_tasks: GetTasks,
-    update_task: UpdateTask,
     repo: Arc<Repo>,
 }
 
 impl TaskService {
     /// Create a new task service
     pub fn new(repo: Arc<Repo>) -> Self {
-        Self {
-            delete_task: DeleteTask(repo.clone()),
-            get_task: GetTask(repo.clone()),
-            get_tasks: GetTasks(repo.clone()),
-            update_task: UpdateTask(repo.clone()),
-            repo,
-        }
+        Self { repo }
     }
 
     /// Create a task
     pub async fn create(&self, story_id: i32, name: String) -> Result<Task> {
-        let create_task = CreateTask(self.repo.clone());
-        create_task(story_id, name).await
+        create_task(self.repo.clone(), story_id, name).await
     }
 
     /// Delete a task
     pub async fn delete(&self, id: i32) -> Result<()> {
-        self.delete_task.execute(id).await
+        delete_task(self.repo.clone(), id).await
     }
 
     /// Get a task
     pub async fn get(&self, id: i32) -> Result<Task> {
-        self.get_task.execute(id).await
+        get_task(self.repo.clone(), id).await
     }
 
     /// Get tasks for a story
     pub async fn list(&self, story_id: i32) -> Result<Vec<Task>> {
-        self.get_tasks.execute(story_id).await
+        get_tasks(self.repo.clone(), story_id).await
     }
 
     /// Update a task
@@ -70,7 +58,6 @@ impl TaskService {
         name: Option<String>,
         status: Option<Status>,
     ) -> Result<Task> {
-        let args = (id, name, status);
-        self.update_task.execute(args).await
+        update_task(self.repo.clone(), id, name, status).await
     }
 }

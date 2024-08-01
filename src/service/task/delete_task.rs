@@ -1,33 +1,28 @@
-use crate::{repo::Repo, service::UseCase, Result};
-use async_trait::async_trait;
-use futures_util::TryFutureExt;
-use std::{ops::Deref, sync::Arc};
+use crate::{repo::Repo, Result};
+use futures_util::{Future, TryFutureExt};
+use std::{ops::AsyncFnOnce, pin::Pin, sync::Arc};
 
-/// Delete a task by id.
-pub struct DeleteTask(pub Arc<Repo>);
+#[allow(non_upper_case_globals)]
+pub const delete_task: DeleteTask = DeleteTask;
 
-#[async_trait]
-impl UseCase for DeleteTask {
-    /// Input is a task id
-    type Req = i32;
+/// Deletes tasks.
+pub struct DeleteTask;
 
-    /// Output is unit or error
-    type Rep = Result<()>;
+/// Sugar for function inputs.
+type Args = (Arc<Repo>, i32);
 
-    /// Delete a task.
-    async fn execute(&self, id: Self::Req) -> Self::Rep {
-        tracing::debug!("execute: id={}", id);
-        self.fetch_task(id)
-            .and_then(|_| self.delete_task(id))
-            .await
-            .map(|_| ())
-    }
-}
+/// Call as an async function.
+impl AsyncFnOnce<Args> for DeleteTask {
+    type Output = Result<()>;
+    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
 
-// Allows calls to wrapped repo at use case level.
-impl Deref for DeleteTask {
-    type Target = Arc<Repo>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
+    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
+        let (repo, id) = args;
+        Box::pin(async move {
+            repo.fetch_task(id)
+                .and_then(|_| repo.delete_task(id))
+                .await
+                .map(|_| ())
+        })
     }
 }

@@ -1,42 +1,36 @@
-use crate::{domain::Task, repo::Repo, service::UseCase, Result};
-use async_trait::async_trait;
-use std::{ops::Deref, sync::Arc};
+use crate::{domain::Task, repo::Repo, Result};
+use futures_util::Future;
+use std::{ops::AsyncFnOnce, pin::Pin, sync::Arc};
+
+#[allow(non_upper_case_globals)]
+pub const get_tasks: GetTasks = GetTasks;
 
 /// Get story tasks.
-pub struct GetTasks(pub Arc<Repo>);
+pub struct GetTasks;
 
-#[async_trait]
-impl UseCase for GetTasks {
-    /// Input is a story id
-    type Req = i32;
+/// Sugar for function inputs.
+type Args = (Arc<Repo>, i32);
 
-    /// Output is a vector of tasks
-    type Rep = Result<Vec<Task>>;
+/// Call as an async function.
+impl AsyncFnOnce<Args> for GetTasks {
+    type Output = Result<Vec<Task>>;
+    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
 
-    /// Get all tasks for a story if it exists. If the story does't exist,
-    /// return a `NotFound` error.
-    async fn execute(&self, story_id: Self::Req) -> Self::Rep {
-        tracing::debug!("execute: story_id={}", story_id);
+    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
+        let (repo, story_id) = args;
+        Box::pin(async move {
+            // Try and query for tasks first.
+            let tasks = repo.list_tasks(story_id).await?;
 
-        // Try and query for tasks first.
-        let tasks = self.list_tasks(story_id).await?;
+            // When zero tasks were returned, check whether the story exists.
+            // This is an optimization; if tasks were returned, the story DOES exist
+            // and no further querying is required.
+            if tasks.is_empty() {
+                // Only care about errors here
+                let _ = repo.fetch_story(story_id).await?;
+            }
 
-        // When zero tasks were returned, check whether the story exists.
-        // This is an optimization; if tasks were returned, the story DOES exist
-        // and no further querying is required.
-        if tasks.is_empty() {
-            // Only care about errors here
-            let _ = self.fetch_story(story_id).await?;
-        }
-
-        Ok(tasks)
-    }
-}
-
-// Allows calls to wrapped repo at use case level.
-impl Deref for GetTasks {
-    type Target = Arc<Repo>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
+            Ok(tasks)
+        })
     }
 }

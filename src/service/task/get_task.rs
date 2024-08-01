@@ -1,29 +1,23 @@
-use crate::{domain::Task, repo::Repo, service::UseCase, Result};
-use async_trait::async_trait;
-use std::{ops::Deref, sync::Arc};
+use crate::{domain::Task, repo::Repo, Result};
+use futures_util::Future;
+use std::{ops::AsyncFnOnce, pin::Pin, sync::Arc};
 
-/// Get a task by id.
-pub struct GetTask(pub Arc<Repo>);
+#[allow(non_upper_case_globals)]
+pub const get_task: GetTask = GetTask;
 
-#[async_trait]
-impl UseCase for GetTask {
-    /// Input is a task id
-    type Req = i32;
+/// Gets tasks by id.
+pub struct GetTask;
 
-    /// Output is a task or error.
-    type Rep = Result<Task>;
+/// Sugar for function inputs.
+type Args = (Arc<Repo>, i32);
 
-    /// Get a task.
-    async fn execute(&self, id: Self::Req) -> Self::Rep {
-        tracing::debug!("execute: id={}", id);
-        self.fetch_task(id).await
-    }
-}
+/// Call as an async function.
+impl AsyncFnOnce<Args> for GetTask {
+    type Output = Result<Task>;
+    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
 
-// Allows calls to wrapped repo at use case level.
-impl Deref for GetTask {
-    type Target = Arc<Repo>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
+    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
+        let (repo, id) = args;
+        Box::pin(async move { repo.fetch_task(id).await })
     }
 }
