@@ -13,16 +13,20 @@ use std::{
 /// Use case for creating new tasks.
 pub struct CreateTask(pub Arc<Repo>);
 
-// Use case function outputs.
+// Function inputs
+type Args2 = (i32, String);
+type Args3 = (i32, String, Status);
+
+// Function outputs
 type Res = Result<Task>;
 type ResFut = Pin<Box<dyn Future<Output = Res> + Send>>;
 
-/// Call as an async function with 2 args.
-impl AsyncFnOnce<(i32, String)> for CreateTask {
+// Call as an async function with 2 args.
+impl AsyncFnOnce<Args2> for CreateTask {
     type Output = Res;
     type CallOnceFuture = ResFut;
 
-    extern "rust-call" fn async_call_once(self, args: (i32, String)) -> Self::CallOnceFuture {
+    extern "rust-call" fn async_call_once(self, args: Args2) -> Self::CallOnceFuture {
         let (story_id, name) = args;
         Box::pin(async move {
             self.fetch_story(story_id)
@@ -32,15 +36,12 @@ impl AsyncFnOnce<(i32, String)> for CreateTask {
     }
 }
 
-/// Arguments: story_id, name, and status.
-type Args = (i32, String, Status);
-
-/// Call as an async function with 3 args.
-impl AsyncFnOnce<Args> for CreateTask {
+// Call as an async function with 3 args.
+impl AsyncFnOnce<Args3> for CreateTask {
     type Output = Res;
     type CallOnceFuture = ResFut;
 
-    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
+    extern "rust-call" fn async_call_once(self, args: Args3) -> Self::CallOnceFuture {
         let (story_id, name, status) = args;
         Box::pin(async move {
             self.fetch_story(story_id)

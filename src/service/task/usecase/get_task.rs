@@ -8,16 +8,19 @@ pub const get_task: GetTask = GetTask;
 /// Gets tasks by id.
 pub struct GetTask;
 
-/// Sugar for function inputs.
+// Function inputs.
 type Args = (Arc<Repo>, i32);
 
-/// Call as an async function.
-impl AsyncFnOnce<Args> for GetTask {
-    type Output = Result<Task>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+// Function outputs.
+type Res = Result<Task>;
+type ResFut = Pin<Box<dyn Future<Output = Res> + Send>>;
 
-    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
-        let (repo, id) = args;
+// Call as an async function.
+impl AsyncFnOnce<Args> for GetTask {
+    type Output = Res;
+    type CallOnceFuture = ResFut;
+
+    extern "rust-call" fn async_call_once(self, (repo, id): Args) -> Self::CallOnceFuture {
         Box::pin(async move { repo.fetch_task(id).await })
     }
 }

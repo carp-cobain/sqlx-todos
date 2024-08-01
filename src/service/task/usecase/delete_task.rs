@@ -8,16 +8,19 @@ pub const delete_task: DeleteTask = DeleteTask;
 /// Deletes tasks.
 pub struct DeleteTask;
 
-/// Sugar for function inputs.
+// Function inputs.
 type Args = (Arc<Repo>, i32);
 
-/// Call as an async function.
-impl AsyncFnOnce<Args> for DeleteTask {
-    type Output = Result<()>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+// Function outputs.
+type Res = Result<()>;
+type ResFut = Pin<Box<dyn Future<Output = Res> + Send>>;
 
-    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
-        let (repo, id) = args;
+// Call as an async function.
+impl AsyncFnOnce<Args> for DeleteTask {
+    type Output = Res;
+    type CallOnceFuture = ResFut;
+
+    extern "rust-call" fn async_call_once(self, (repo, id): Args) -> Self::CallOnceFuture {
         Box::pin(async move {
             repo.fetch_task(id)
                 .and_then(|_| repo.delete_task(id))

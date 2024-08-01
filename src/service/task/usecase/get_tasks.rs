@@ -8,19 +8,22 @@ pub const get_tasks: GetTasks = GetTasks;
 /// Get story tasks.
 pub struct GetTasks;
 
-/// Sugar for function inputs.
+// Function inputs.
 type Args = (Arc<Repo>, i32);
 
-/// Call as an async function.
+// Function outputs
+type Res = Result<Vec<Task>>;
+type ResFut = Pin<Box<dyn Future<Output = Res> + Send>>;
+
+// Call as an async function.
 impl AsyncFnOnce<Args> for GetTasks {
-    type Output = Result<Vec<Task>>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+    type Output = Res;
+    type CallOnceFuture = ResFut;
 
     extern "rust-call" fn async_call_once(self, (repo, story_id): Args) -> Self::CallOnceFuture {
         Box::pin(async move {
             // Try and query for tasks first.
             let tasks = repo.list_tasks(story_id).await?;
-
             // When zero tasks were returned, check whether the story exists.
             // This is an optimization; if tasks were returned, the story DOES exist
             // and no further querying is required.
@@ -28,7 +31,6 @@ impl AsyncFnOnce<Args> for GetTasks {
                 // Only care about errors here
                 let _ = repo.fetch_story(story_id).await?;
             }
-
             Ok(tasks)
         })
     }

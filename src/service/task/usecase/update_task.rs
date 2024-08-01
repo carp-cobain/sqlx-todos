@@ -13,15 +13,21 @@ use std::{
 /// Updates tasks
 pub struct UpdateTask(pub Arc<Repo>);
 
-/// Call as an async function with id, name, and status args.
-impl AsyncFnOnce<(i32, String, Status)> for UpdateTask {
-    type Output = Result<Task>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+// Function inputs
+type Args = (i32, String, Status);
+type ArgsNm = (i32, String);
+type ArgsSt = (i32, Status);
 
-    extern "rust-call" fn async_call_once(
-        self,
-        args: (i32, String, Status),
-    ) -> Self::CallOnceFuture {
+// Function outputs
+type Res = Result<Task>;
+type ResFut = Pin<Box<dyn Future<Output = Res> + Send>>;
+
+// Call as an async function with id, name, and status args.
+impl AsyncFnOnce<Args> for UpdateTask {
+    type Output = Res;
+    type CallOnceFuture = ResFut;
+
+    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
         let (id, name, status) = args;
         tracing::debug!("args: id={}, name={}, status={}", id, name, status);
 
@@ -34,12 +40,12 @@ impl AsyncFnOnce<(i32, String, Status)> for UpdateTask {
     }
 }
 
-/// Call as an async function with id and name args.
-impl AsyncFnOnce<(i32, String)> for UpdateTask {
-    type Output = Result<Task>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+// Call as an async function with id and name args.
+impl AsyncFnOnce<ArgsNm> for UpdateTask {
+    type Output = Res;
+    type CallOnceFuture = ResFut;
 
-    extern "rust-call" fn async_call_once(self, args: (i32, String)) -> Self::CallOnceFuture {
+    extern "rust-call" fn async_call_once(self, args: ArgsNm) -> Self::CallOnceFuture {
         let (id, name) = args;
         tracing::debug!("args: id={}. name={}", id, name);
 
@@ -52,12 +58,12 @@ impl AsyncFnOnce<(i32, String)> for UpdateTask {
     }
 }
 
-/// Call as an async function with id and status args.
-impl AsyncFnOnce<(i32, Status)> for UpdateTask {
-    type Output = Result<Task>;
-    type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
+// Call as an async function with id and status args.
+impl AsyncFnOnce<ArgsSt> for UpdateTask {
+    type Output = Res;
+    type CallOnceFuture = ResFut;
 
-    extern "rust-call" fn async_call_once(self, args: (i32, Status)) -> Self::CallOnceFuture {
+    extern "rust-call" fn async_call_once(self, args: ArgsSt) -> Self::CallOnceFuture {
         let (id, status) = args;
         tracing::debug!("args: id={}. status={}", id, status);
 
