@@ -5,19 +5,13 @@ use crate::{
 };
 use std::sync::Arc;
 
-// Use case mods
-mod create_task;
-mod delete_task;
-mod get_task;
-mod get_tasks;
-mod update_task;
-
-// Use cases
-use create_task::create_task;
-use delete_task::delete_task;
-use get_task::get_task;
-use get_tasks::get_tasks;
-use update_task::update_task;
+// Task use cases
+mod usecase;
+use usecase::create_task;
+use usecase::delete_task;
+use usecase::get_task;
+use usecase::get_tasks;
+use usecase::update_task;
 
 /// A high-level API for managaing tasks.
 /// This service is composed of use cases.
