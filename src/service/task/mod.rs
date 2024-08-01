@@ -1,14 +1,14 @@
 use crate::{
     domain::{Status, Task},
     repo::Repo,
-    Result,
+    Error, Result,
 };
 use std::sync::Arc;
 
 // Task use cases
 mod usecase;
-use usecase::CreateTask;
-use usecase::{delete_task, get_task, get_tasks, update_task};
+use usecase::{delete_task, get_task, get_tasks};
+use usecase::{CreateTask, UpdateTask};
 
 /// A high-level API for managaing tasks.
 /// This service is composed of use cases.
@@ -47,9 +47,22 @@ impl TaskService {
     pub async fn update(
         &self,
         id: i32,
-        name: Option<String>,
-        status: Option<Status>,
+        name_opt: Option<String>,
+        status_opt: Option<Status>,
     ) -> Result<Task> {
-        update_task(self.repo.clone(), id, name, status).await
+        // Create use case
+        let update_task = UpdateTask(self.repo.clone());
+        // Apply updates if provided or return an error.
+        // This is an example of the variadic nature of `AsyncFnOnce`.
+        match (name_opt, status_opt) {
+            // Update both name and status
+            (Some(name), Some(status)) => update_task(id, name, status).await,
+            // Update name
+            (Some(name), None) => update_task(id, name).await,
+            // Update status
+            (None, Some(status)) => update_task(id, status).await,
+            // Error case
+            (None, None) => Err(Error::invalid_args("no task update provided")),
+        }
     }
 }

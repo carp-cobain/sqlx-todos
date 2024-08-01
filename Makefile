@@ -3,11 +3,11 @@ all: fmt check
 
 .PHONY: fmt
 fmt:
-	cargo +nightly fmt --all
+	@cargo +nightly fmt --all
 
 .PHONY: check
 check:
-	cargo +nightly check
+	@cargo +nightly check
 
 .PHONY: build
 build:

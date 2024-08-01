@@ -16,8 +16,7 @@ impl AsyncFnOnce<Args> for GetTasks {
     type Output = Result<Vec<Task>>;
     type CallOnceFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
 
-    extern "rust-call" fn async_call_once(self, args: Args) -> Self::CallOnceFuture {
-        let (repo, story_id) = args;
+    extern "rust-call" fn async_call_once(self, (repo, story_id): Args) -> Self::CallOnceFuture {
         Box::pin(async move {
             // Try and query for tasks first.
             let tasks = repo.list_tasks(story_id).await?;
