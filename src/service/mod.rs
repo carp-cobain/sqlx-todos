@@ -1,5 +1,7 @@
 /// Services for stories.
-pub mod story;
+mod story;
+pub use story::StoryService;
 
 /// Services for tasks.
-pub mod task;
+mod task;
+pub use task::TaskService;

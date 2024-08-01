@@ -1,6 +1,6 @@
 use crate::{
     repo::Repo,
-    service::{story::StoryService, task::TaskService},
+    service::{StoryService, TaskService},
 };
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
@@ -20,9 +20,9 @@ impl Ctx {
         // Repo
         let repo = Arc::new(Repo::new(db.clone()));
 
-        // Services (organize/group use cases by domain).
+        // Services (group logic by domain).
         let task_service = TaskService::new(repo.clone());
-        let story_service = StoryService::new(repo);
+        let story_service = StoryService::new(repo.clone());
 
         // Ctx
         Self {

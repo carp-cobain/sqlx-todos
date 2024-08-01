@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 /// A high-level API for managaing stories.
 /// This service is a standard service that does NOT rely on use cases.
+/// This layout is cleaner for simple services.
 pub struct StoryService {
     repo: Arc<Repo>,
 }

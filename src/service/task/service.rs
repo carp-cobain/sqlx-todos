@@ -9,8 +9,9 @@ use std::sync::Arc;
 use super::usecase::{delete_task, get_task, get_tasks};
 use super::usecase::{CreateTask, UpdateTask};
 
-/// A high-level API for managaing tasks.
-/// This service is composed of use cases.
+/// A high-level API for managaing tasks. This service is composed of use cases (async function
+/// traits). This layout would be cleaner for complex services, but here it's just for
+/// demonstration purposes.
 pub struct TaskService {
     repo: Arc<Repo>,
 }
