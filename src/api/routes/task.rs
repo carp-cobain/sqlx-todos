@@ -34,8 +34,8 @@ async fn create_task(
     Json(body): Json<CreateTaskBody>,
 ) -> Result<impl IntoResponse> {
     tracing::info!("POST /tasks");
-    let (story_id, name) = body.validate()?;
-    let task = ctx.tasks.create(story_id, name).await?;
+    let (story_id, name, status_opt) = body.validate()?;
+    let task = ctx.tasks.create(story_id, name, status_opt).await?;
     Ok((StatusCode::CREATED, Json(task)))
 }
 

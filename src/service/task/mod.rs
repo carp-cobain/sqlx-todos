@@ -23,9 +23,17 @@ impl TaskService {
     }
 
     /// Create a task
-    pub async fn create(&self, story_id: i32, name: String) -> Result<Task> {
+    pub async fn create(
+        &self,
+        story_id: i32,
+        name: String,
+        status_opt: Option<Status>,
+    ) -> Result<Task> {
         let create_task = CreateTask(self.repo.clone());
-        create_task(story_id, name).await
+        match status_opt {
+            Some(status) => create_task(story_id, name, status).await,
+            None => create_task(story_id, name).await,
+        }
     }
 
     /// Delete a task
