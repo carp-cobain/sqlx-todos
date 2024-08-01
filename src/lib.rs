@@ -1,7 +1,6 @@
 #![feature(unboxed_closures)]
 #![feature(async_fn_traits)]
 #![feature(async_closure)]
-#![feature(tuple_trait)]
 
 pub mod api;
 pub mod config;

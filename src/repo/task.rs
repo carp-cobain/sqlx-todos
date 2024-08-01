@@ -75,9 +75,14 @@ impl Repo {
         Ok(tasks)
     }
 
-    /// Insert a new task
-    pub async fn create_task(&self, story_id: i32, name: String) -> Result<Task> {
-        tracing::debug!("create_task: story_id={}, name={}", story_id, name);
+    /// Insert a new task with the given status.
+    pub async fn create_task(&self, story_id: i32, name: String, status: Status) -> Result<Task> {
+        tracing::debug!(
+            "create_task: story_id={}, name={}, status={}",
+            story_id,
+            name,
+            status
+        );
 
         let query = sql::task::CREATE.strip_margin();
         tracing::debug!("sql: {}", query);
@@ -85,6 +90,7 @@ impl Repo {
         let task = sqlx::query_as(&query)
             .bind(story_id)
             .bind(name)
+            .bind(status.to_string())
             .fetch_one(self.db_ref())
             .await?;
 
@@ -164,7 +170,7 @@ mod tests {
 
         // Create task, ensuring status is incomplete
         let task = repo
-            .create_task(story_id.clone(), "Suttree".to_string())
+            .create_task(story_id.clone(), "Suttree".to_string(), Status::default())
             .await
             .unwrap();
         assert_eq!(task.status, Status::Incomplete);

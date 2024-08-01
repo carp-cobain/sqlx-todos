@@ -7,11 +7,8 @@ use std::sync::Arc;
 
 // Task use cases
 mod usecase;
-use usecase::create_task;
-use usecase::delete_task;
-use usecase::get_task;
-use usecase::get_tasks;
-use usecase::update_task;
+use usecase::CreateTask;
+use usecase::{delete_task, get_task, get_tasks, update_task};
 
 /// A high-level API for managaing tasks.
 /// This service is composed of use cases.
@@ -27,7 +24,8 @@ impl TaskService {
 
     /// Create a task
     pub async fn create(&self, story_id: i32, name: String) -> Result<Task> {
-        create_task(self.repo.clone(), story_id, name).await
+        let create_task = CreateTask(self.repo.clone());
+        create_task(story_id, name).await
     }
 
     /// Delete a task
