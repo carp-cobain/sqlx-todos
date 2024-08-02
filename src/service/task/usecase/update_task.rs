@@ -32,7 +32,7 @@ impl AsyncFnOnce<Args> for UpdateTask {
         tracing::debug!("args: id={}, name={}, status={}", id, name, status);
 
         Box::pin(async move {
-            // Fetch the task and update it's name and status.
+            // Fetch the task and update its name and status.
             self.fetch_task(id)
                 .and_then(|_| self.update_task(id, name, status))
                 .await
@@ -50,7 +50,7 @@ impl AsyncFnOnce<ArgsNm> for UpdateTask {
         tracing::debug!("args: id={}. name={}", id, name);
 
         Box::pin(async move {
-            // Fetch the task and update it's name.
+            // Fetch the task and update its name.
             self.fetch_task(id)
                 .and_then(|t| self.update_task(id, name, t.status))
                 .await
@@ -68,7 +68,7 @@ impl AsyncFnOnce<ArgsSt> for UpdateTask {
         tracing::debug!("args: id={}. status={}", id, status);
 
         Box::pin(async move {
-            // Fetch the task and update it's status.
+            // Fetch the task and update its status.
             self.fetch_task(id)
                 .and_then(|t| self.update_task(id, t.name, status))
                 .await
