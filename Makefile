@@ -1,5 +1,5 @@
 .PHONY: all
-all: fmt check
+all: fmt build test lint
 
 .PHONY: fmt
 fmt:

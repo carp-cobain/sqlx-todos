@@ -6,8 +6,8 @@ use crate::{
 use std::sync::Arc;
 
 // Task use cases
-use super::usecase::{delete_task, get_task, get_tasks};
-use super::usecase::{CreateTask, UpdateTask};
+use crate::usecase::task::{delete_task, get_task, get_tasks};
+use crate::usecase::task::{CreateTask, UpdateTask};
 
 /// A high-level API for managaing tasks. This service is composed of use cases (async function
 /// traits). This layout would be cleaner for complex services, but here it's just for

@@ -8,6 +8,7 @@ pub mod domain;
 pub mod error;
 pub mod repo;
 pub mod service;
+pub mod usecase;
 
 /// Expose error at the top level
 pub use error::Error;
