@@ -1,6 +1,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
+use axum::Router;
 use dotenvy::dotenv;
 use sqlx::migrate::Migrator;
 use sqlx_todos::{
@@ -40,11 +41,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Set up API
     let ctx = Ctx::new(Arc::new(pool));
     let api = Api::new(Arc::new(ctx));
+    let service = Router::new().nest("/todos/api/v1", api.routes());
 
     // Start server
     tracing::info!("Server listening on {}", config.listen_addr);
     let listener = config.tcp_listener().await;
-    axum::serve(listener, api.routes()).await?;
+    axum::serve(listener, service).await?;
 
     Ok(())
 }
